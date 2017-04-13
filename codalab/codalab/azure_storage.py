@@ -169,7 +169,7 @@ class AzureBlockBlobFile(RawIOBase):
     def write(self, data):
         blockid = "%6d" % len(self._block_list)
         try:
-            self.connection.put_block(self.container, self.name, data, blockid)
+            self.connection.put_block(self.container, self.name, data, blockid, timeout=360)
             self._block_list.append((blockid, len(data)))
             return len(data)
         except azure.WindowsAzureError as e:
