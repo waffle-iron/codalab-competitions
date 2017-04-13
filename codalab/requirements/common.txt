@@ -58,5 +58,5 @@ Sphinx==1.4.1
 
 
 # Added for python sdk
-git+https://github.com/FlavioAlexander/azure-sdk-for-python.git@legacy
+git+https://github.com/codalab/azure-sdk-for-python.git@master
 

@@ -19,12 +19,11 @@ try:
 
     from azure.storage import (
         AccessPolicy,
-        # BlobService,
+        BlobService,
         SharedAccessPolicy,
         SharedAccessSignature,
         StorageServiceProperties,
     )
-    from azure.storage.blobservice import BlockBlobService as BlobService
 
 except ImportError:
     raise ImproperlyConfigured(
