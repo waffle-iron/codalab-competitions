@@ -4,7 +4,7 @@ This module defines Windows Azure extensions for CodaLab.
 import logging
 from time import sleep
 
-from azure import WindowsAzureError
+from azure.common import AzureException
 
 from azure.servicebus import (
     ServiceBusService,
@@ -49,7 +49,7 @@ class AzureServiceBusQueue(Queue):
         '''Helper to retry request for sending and receiving messages.'''
         try:
             return fn()
-        except (WindowsAzureError) as e:
+        except (AzureException) as e:
             if retry_count < self.max_retries:
                 logger.error("Retrying request after error occurred. Attempt %s of %s.",
                              retry_count+1, self.max_retries)

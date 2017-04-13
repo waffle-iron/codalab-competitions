@@ -6,6 +6,7 @@ import datetime
 import os.path
 import re
 import itertools
+
 from django.core.files.storage import Storage
 from django.core.exceptions import ImproperlyConfigured
 from io import RawIOBase
@@ -19,11 +20,12 @@ try:
 
     from azure.storage import (
         AccessPolicy,
-        BlobService,
         SharedAccessPolicy,
         SharedAccessSignature,
         StorageServiceProperties,
     )
+
+    from azure.storage.blob import BlobService
 
 except ImportError:
     raise ImproperlyConfigured(
@@ -172,7 +174,7 @@ class AzureBlockBlobFile(RawIOBase):
             self.connection.put_block(self.container, self.name, data, blockid, timeout=360)
             self._block_list.append((blockid, len(data)))
             return len(data)
-        except azure.WindowsAzureError as e:
+        except azure.common.AzureException as e:
             raise e
 
     def flush(self):
