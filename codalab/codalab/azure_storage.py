@@ -24,7 +24,7 @@ try:
         SharedAccessSignature,
         StorageServiceProperties,
     )
-    from azure.storage.blobservice import BlobService
+    from azure.storage.blobservice import BlockBlobService as BlobService
 
 except ImportError:
     raise ImproperlyConfigured(
