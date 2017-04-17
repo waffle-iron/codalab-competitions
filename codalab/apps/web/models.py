@@ -49,12 +49,12 @@ logger = logging.getLogger(__name__)
 StorageClass = get_storage_class(settings.DEFAULT_FILE_STORAGE)
 try:
     BundleStorage = StorageClass(account_name=settings.BUNDLE_AZURE_ACCOUNT_NAME,
-                                        account_key=settings.BUNDLE_AZURE_ACCOUNT_KEY,
-                                        azure_container=settings.BUNDLE_AZURE_CONTAINER)
+                                 account_key=settings.BUNDLE_AZURE_ACCOUNT_KEY,
+                                 azure_container=settings.BUNDLE_AZURE_CONTAINER)
 
     PublicStorage = StorageClass(account_name=settings.AZURE_ACCOUNT_NAME,
-                                        account_key=settings.AZURE_ACCOUNT_KEY,
-                                        azure_container=settings.AZURE_CONTAINER)
+                                 account_key=settings.AZURE_ACCOUNT_KEY,
+                                 azure_container=settings.AZURE_CONTAINER)
 
 except:
     BundleStorage = StorageClass()
@@ -280,7 +280,7 @@ class Competition(models.Model):
 
     @cached_property
     def image_url(self):
-        # Return the transformed image_url
+        """Return the transformed image_url"""
         if self.image:
             return os.path.join(self.image_url_base, self.image.name)
         return None

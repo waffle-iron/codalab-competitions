@@ -25,11 +25,12 @@ import yaml
 from os.path import dirname, abspath, join
 from subprocess import Popen, call
 from zipfile import ZipFile
-
+from azure.storage.blob import BlockBlobService as BlobService
+from azure.common import AzureMissingResourceHttpError
+# import azure
 # Add codalabtools to the module search path
 sys.path.append(dirname(dirname(dirname(abspath(__file__)))))
 
-from azure.storage import BlobService
 from codalabtools import BaseWorker, BaseConfig
 from codalabtools.azure_extensions import AzureServiceBusQueue
 
@@ -103,6 +104,7 @@ class WorkerConfig(BaseConfig):
         """Gets the path for the local directory where files are staged or None if the path is not provided."""
         return self._winfo['local-root'] if 'local-root' in self._winfo else None
 
+
 def getBundle(root_path, blob_service, container, bundle_id, bundle_rel_path, max_depth=3):
     """
     be controlled with the max_depth parameter.
@@ -132,7 +134,7 @@ def getBundle(root_path, blob_service, container, bundle_id, bundle_rel_path, ma
         try:
             logger.debug("Getting bundle_id=%s from container=%s" % (container, bundle_id))
             blob = blob_service.get_blob(container, bundle_id)
-        except azure.WindowsAzureMissingResourceError:
+        except AzureMissingResourceHttpError:
             #file not found lets None this bundle
             bundles[bundle_rel_path] = None
             return bundles
@@ -519,6 +521,7 @@ def get_run_func(config):
                 logger.exception("Unable to clean-up local folder %s (task_id=%s)", root_dir, task_id)
     return run
 
+
 def main():
     """
     Setup the worker and start it.
@@ -539,8 +542,9 @@ def main():
         'run' : get_run_func(config)
     }
     # create and start the worker
+    # import pdb; pdb.set_trace()
     worker = BaseWorker(queue, vtable, logger)
-    logger.info("Starting compute worker.")
+    logger.info("Starting compute worker for computer worker.")
     worker.start()
 
 if __name__ == "__main__":

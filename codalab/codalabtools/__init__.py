@@ -3,13 +3,13 @@ Package containing the CodaLab client tools.
 """
 
 import json
-import logging
 import multiprocessing
 import os
 import yaml
 import time
 
 from Queue import Empty
+
 
 class BaseConfig(object):
     """
@@ -61,6 +61,7 @@ class Queue(object):
         """
         raise NotImplementedError()
 
+
 class QueueMessage(object):
     """
     Provides an abstract definition for a message exchanged through a queue.
@@ -68,14 +69,17 @@ class QueueMessage(object):
     def get_body(self):
         """Gets a string representing the body of the message."""
         raise NotImplementedError()
+
     def get_queue(self):
         """Gets the Queue instance from which the message was retrieved."""
         raise NotImplementedError()
+
 
 class QueueMessageError(Exception):
     """Indicates that the body of a queue message cannot be decoded or is invalid."""
     def __init__(self, message):
         Exception.__init__(self, message)
+
 
 def decode_message_body(message):
     """
@@ -100,6 +104,7 @@ def decode_message_body(message):
         raise QueueMessageError("Missing key: task_type.")
     return data
 
+
 class BaseWorker(object):
     """
     Defines the base implementation for a worker process which listens to a queue for
@@ -122,9 +127,13 @@ class BaseWorker(object):
     def _message_receive_listen(self, queue):
         while True:
             try:
+                print "testing here"
+                print self.queue
                 self.logger.debug("Waiting for message.")
                 queue.put('waiting for message')
                 msg = self.queue.receive_message()
+                print "message"
+                print msg
                 if msg is not None:
                     queue.put('received message')
                     self.logger.debug("Received message: %s", msg.get_body())
@@ -152,6 +161,7 @@ class BaseWorker(object):
         last_message = None
         queue = multiprocessing.Queue(8)
         worker = multiprocessing.Process(target=self._message_receive_listen, args=(queue,))
+        print "Something something something"
         worker.start()
 
         while True:
@@ -164,6 +174,7 @@ class BaseWorker(object):
 
             # We don't want to shut off submissions in process, so only terminate if we're waiting for a message
             if last_message == 'waiting for message' and result is None:
+                print "Inside while loop"
                 self.logger.debug("Restarting worker thread")
                 worker.terminate()
                 worker = multiprocessing.Process(target=self._message_receive_listen, args=(queue,))

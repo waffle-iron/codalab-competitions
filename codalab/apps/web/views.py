@@ -13,7 +13,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.models import Site
 from django.core.cache import cache
-from django.core.exceptions import ImproperlyConfigured
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -43,13 +42,8 @@ from tasks import evaluate_submission
 
 from extra_views import UpdateWithInlinesView, InlineFormSet, NamedFormsetsMixin
 
-try:
-    import azure
-    import azure.storage
-except ImportError:
-    raise ImproperlyConfigured(
-        "Could not load Azure bindings. "
-        "See https://github.com/WindowsAzure/azure-sdk-for-python")
+from azure.common import AzureMissingResourceHttpError
+
 
 User = get_user_model()
 
@@ -458,6 +452,7 @@ class CompetitionDetailView(DetailView):
 
         # Use this flag to trigger container-fluid for result table
         context['on_competition_detail'] = True
+        # import pdb; pdb.set_trace()
 
         return context
 
@@ -926,7 +921,7 @@ class MyCompetitionSubmissionOutput(LoginRequiredMixin, View):
             else:
                 response['Content-Type'] = file_type
             return response
-        except azure.WindowsAzureMissingResourceError:
+        except AzureMissingResourceHttpError:
             # for stderr.txt which does not exist when no errors have occurred
             # this may hide a true 404 in unexpected circumstances
             return HttpResponse("", status=200, content_type='text/plain')

@@ -15,15 +15,23 @@ pathjoin = lambda *args: os.path.join(*args).replace("\\", "/")
 
 try:
     import azure
-    import azure.storage
+
+    # from azure.storage import (
+    #     AccessPolicy,
+    #     BlobService,
+    #     SharedAccessPolicy,
+    #     SharedAccessSignature,
+    #     StorageServiceProperties,
+    # )
 
     from azure.storage import (
-        AccessPolicy,
-        BlobService,
-        SharedAccessPolicy,
-        SharedAccessSignature,
-        StorageServiceProperties,
+        CloudStorageAccount,
+        Services,
+        ResourceTypes,
+        AccountPermissions
     )
+    from azure.storage.blob import BlockBlobService as BaseBlobService
+    from azure.common import AzureMissingResourceHttpError
 
 except ImportError:
     raise ImproperlyConfigured(
@@ -38,6 +46,7 @@ def clean_name(name):
 
 
 class AzureStorage(Storage):
+
     chunk_size = 65536
 
     def __init__(self, *args, **kwargs):
@@ -50,7 +59,7 @@ class AzureStorage(Storage):
     @property
     def connection(self):
         if self._connection is None:
-            self._connection = azure.storage.BlobService(
+            self._connection = BaseBlobService(
                 self.account_name, self.account_key)
         return self._connection
 
@@ -60,7 +69,7 @@ class AzureStorage(Storage):
     def exists(self, name):
         try:
             p = self.properties(name)
-        except azure.WindowsAzureMissingResourceError:
+        except AzureMissingResourceHttpError:
             return False
         else:
             return True
@@ -78,8 +87,13 @@ class AzureStorage(Storage):
         f.close()
         return name
 
+    # def url(self, name):
+    #     return "https://%s%s/%s/%s" % (self.account_name, azure.BLOB_SERVICE_HOST_BASE, self.azure_container, name)
+    # Needs to be implemented properly, just to get it working
     def url(self, name):
-        return "https://%s%s/%s/%s" % (self.account_name, azure.BLOB_SERVICE_HOST_BASE, self.azure_container, name)
+        blob_service = BaseBlobService(self.account_name, self.account_key)
+        url = blob_service.make_blob_url(self.azure_container, name)
+        return url
 
     def properties(self, name):
         return self.connection.get_blob_properties(
@@ -117,17 +131,20 @@ class AzureBlockBlobFile(RawIOBase):
                 self.properties
                 if 'a' not in mode:
                     raise Exception("File Already Exists.")
-            except azure.WindowsAzureMissingResourceError as e:
+            except AzureMissingResourceHttpError as e:
                 res = self.connection.put_blob(self.container, self.name, '', "BlockBlob")
         self._cur = 0
-        self._end = (int(self.properties['content-length']) - 1) if int(self.properties['content-length']) > 0 else 0
+        # import pdb; pdb.set_trace()
+        # properties = self.connection.get_blob_properties(self.container, self.name)
+        # import pdb; pdb.set_trace()
+        self._end = (int(self.properties.content_length) - 1) if int(self.properties.content_length) > 0 else 0
         self._block_list = []
 
     @property
     def properties(self):
         if self._properties is None:
             self._properties = self.connection.get_blob_properties(self.container, self.name)
-        return self._properties
+        return self._properties.properties
 
     @property
     def size(self):
@@ -207,18 +224,26 @@ def make_blob_sas_url(account_name,
 
     Returns the SAS URL.
     """
-    sas = SharedAccessSignature(account_name, account_key)
-    resource_path = '%s/%s' % (container_name, blob_name)
-    date_format = "%Y-%m-%dT%H:%M:%SZ"
+    # sas = SharedAccessSignature(account_name, account_key)
+    # resource_path = '%s/%s' % (container_name, blob_name)
+    # date_format = "%Y-%m-%dT%H:%M:%SZ"
     start = datetime.datetime.utcnow() - datetime.timedelta(minutes=5)
     expiry = start + datetime.timedelta(minutes=duration)
-    sap = SharedAccessPolicy(AccessPolicy(
-            start.strftime(date_format),
-            expiry.strftime(date_format),
-            permission))
-    sas_token = sas.generate_signed_query_string(resource_path, 'b', sap)
+    # sap = SharedAccessPolicy(AccessPolicy(
+    #         start.strftime(date_format),
+    #         expiry.strftime(date_format),
+    #         permission))
+    # sas_token = sas.generate_signed_query_string(resource_path, 'b', sap)
+    account = CloudStorageAccount(account_name=account_name, account_key=account_key)
+    sas_token = account.generate_shared_access_signature(
+        services=Services.BLOB,
+        resource_types=ResourceTypes.OBJECT,
+        permission=AccountPermissions.WRITE,
+        expiry=expiry,
+        start=start
+    )
 
-    blob_url = BlobService(account_name, account_key)
+    blob_url = BaseBlobService(account_name, account_key)
 
     url = blob_url.make_blob_url(container_name=container_name, blob_name=blob_name, sas_token=sas_token)
 

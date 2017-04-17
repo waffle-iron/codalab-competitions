@@ -2,7 +2,6 @@ Django==1.5.9
 alembic==0.6.7
 anyjson==0.3.3
 argparse
-# azure==0.7.1
 closure_linter
 django-allauth==0.11.1
 django-analytical==0.15.0
@@ -50,5 +49,8 @@ Sphinx==1.4.1
 
 
 # Added for python sdk
-git+https://github.com/FlavioAlexander/azure-sdk-for-python.git@legacy
+# git+https://github.com/FlavioAlexander/azure-sdk-for-python.git@legacy
+# First we need to uninstall old version
+azure==1.0.3
+azure-storage==0.34.0
 

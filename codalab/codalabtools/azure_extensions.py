@@ -4,7 +4,7 @@ This module defines Windows Azure extensions for CodaLab.
 import logging
 from time import sleep
 
-from azure import WindowsAzureError
+from azure.common import AzureException
 
 from azure.servicebus import (
     ServiceBusService,
@@ -16,6 +16,7 @@ from codalabtools import (
 
 logger = logging.getLogger('codalabtools')
 
+
 class AzureServiceBusQueueMessage(QueueMessage):
     """
     Implements a QueueMessage backed by a Windows Azure Service Bus Queue Message.
@@ -23,10 +24,13 @@ class AzureServiceBusQueueMessage(QueueMessage):
     def __init__(self, queue, message):
         self.queue = queue
         self.message = message
+
     def get_body(self):
         return self.message.body
+
     def get_queue(self):
         raise self.queue
+
 
 class AzureServiceBusQueue(Queue):
     """
@@ -41,15 +45,16 @@ class AzureServiceBusQueue(Queue):
         self.service = ServiceBusService(service_namespace=namespace, account_key=key,
                                          issuer=issuer, shared_access_key_name=shared_access_key_name,
                                          shared_access_key_value=shared_access_key_value)
+
         self.name = name
         self.max_retries = 3
-        self.wait = lambda count: 1.0*(2**count)
+        self.wait = lambda count: 1.0 * (2**count)
 
     def _try_request(self, fn, retry_count=0, fail=None):
         '''Helper to retry request for sending and receiving messages.'''
         try:
             return fn()
-        except (WindowsAzureError) as e:
+        except (AzureException) as e:
             if retry_count < self.max_retries:
                 logger.error("Retrying request after error occurred. Attempt %s of %s.",
                              retry_count+1, self.max_retries)
@@ -66,6 +71,7 @@ class AzureServiceBusQueue(Queue):
         op = lambda: self.service.receive_queue_message(self.name,
                                                         peek_lock=False,
                                                         timeout=self.polling_timeout)
+
         msg = self._try_request(op)
         return None if msg.body is None else AzureServiceBusQueueMessage(self, msg)
 
