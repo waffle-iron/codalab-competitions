@@ -452,7 +452,6 @@ class CompetitionDetailView(DetailView):
 
         # Use this flag to trigger container-fluid for result table
         context['on_competition_detail'] = True
-        # import pdb; pdb.set_trace()
 
         return context
 

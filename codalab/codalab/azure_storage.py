@@ -134,9 +134,7 @@ class AzureBlockBlobFile(RawIOBase):
             except AzureMissingResourceHttpError as e:
                 res = self.connection.put_blob(self.container, self.name, '', "BlockBlob")
         self._cur = 0
-        # import pdb; pdb.set_trace()
         # properties = self.connection.get_blob_properties(self.container, self.name)
-        # import pdb; pdb.set_trace()
         self._end = (int(self.properties.content_length) - 1) if int(self.properties.content_length) > 0 else 0
         self._block_list = []
 
