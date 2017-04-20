@@ -378,7 +378,7 @@ def _deploy():
         # For more info look into https://github.com/greyside/django-config-gen
         run('python manage.py config_gen')
         # Migrate database
-        run('python manage.py syncdb --migrate')
+        # run('python manage.py syncdb --migrate')
         # Create static pages
         run('python manage.py collectstatic --noinput')
         # For sending email, have the right domain name.

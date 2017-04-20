@@ -53,5 +53,5 @@ Sphinx==1.4.1
 # First we need to uninstall old version
 azure==1.0.3
 azure-storage==0.34.0
-azure-servicebus==0.21.1
+azure-servicebus==0.21.0
 
