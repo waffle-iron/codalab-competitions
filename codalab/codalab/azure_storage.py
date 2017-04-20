@@ -132,7 +132,7 @@ class AzureBlockBlobFile(RawIOBase):
                 if 'a' not in mode:
                     raise Exception("File Already Exists.")
             except AzureMissingResourceHttpError as e:
-                res = self.connection.put_blob(self.container, self.name, '', "BlockBlob")
+                res = self.connection.put_block(self.container, self.name, '', "BlockBlob")
         self._cur = 0
         # properties = self.connection.get_blob_properties(self.container, self.name)
         self._end = (int(self.properties.content_length) - 1) if int(self.properties.content_length) > 0 else 0
