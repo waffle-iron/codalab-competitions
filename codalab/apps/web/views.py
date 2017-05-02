@@ -181,6 +181,11 @@ def my_index(request):
 
         - User needs to be authenticated.
     """
+    # Disallow non-admins in single competition mode from viewing this page
+    if settings.SINGLE_COMPETITION_VIEW_PK:
+        if not request.user.is_superuser or request.user.is_staff:
+            raise Http404()
+
     template = loader.get_template("web/my/index.html")
     try:
         denied = models.ParticipantStatus.objects.get(codename=models.ParticipantStatus.DENIED)
