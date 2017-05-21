@@ -90,13 +90,15 @@
                         <td align="center"><a href="#{{ submission.id }}" onclick="Competition.showOrHideSubmissionDetails(this)"><span class="glyphicon glyphicon-plus"></span></a></td>
                         <td align="center"><a class="btn btn-danger btn-xs" href="{% url "competitions:submission_delete" pk=submission.id %}">DEL</a></td>
                         <td align="center">
-                            <button class="btn btn-danger btn-xs hide_or_show_submission_button">
                                 {% if submission.is_in_leaderboard %}
+                                  <button class="btn btn-danger btn-xs hide_or_show_submission_button">
                                     HIDE
+                                  </button>
                                 {% else %}
+                                  <button class="btn btn-success btn-xs hide_or_show_submission_button">
                                     SHOW
+                                  </button>
                                 {% endif %}
-                            </button>
                         </td>
                         <td align="center"><button class="btn btn-danger btn-xs mark_as_failed_button">FAILED</button></td>
                         <td align="center"><button class="btn btn-danger btn-xs re_run_submission_button">RE-RUN</button></td>
