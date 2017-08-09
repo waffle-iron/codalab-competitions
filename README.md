@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/codalab/codalab-competitions.png?label=ready&title=Ready)](https://waffle.io/codalab/codalab-competitions?utm_source=badge)
 # CodaLab [![Circle CI](https://circleci.com/gh/codalab/codalab-competitions.svg?style=shield)](https://circleci.com/gh/codalab/codalab-competitions)
 
 ## What is CodaLab?
